@@ -43,39 +43,48 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open("maed.txt","r")as file:
-    lines=file.readlines()
+def loe_andmed_failist(maed.txt):
+    nimed=[]
+    kõrgused=[]
+    with open(maed.txt,'r') as f:
+        for rida in f:
+            osa=rida.strip().split(',')
+            nimed.append(osa[0])
+            kõrgused.append(int(osa[1]))
+    return nimed,kõrgused
 
-nimed=[]
-korgused=[]
+def arvuta_statistika(kõrgused):
+    keskmine=np.mean(kõrgused)
+    kõrgeim=np.max(kõrgused)
+    madalaim=np.min(kõrgused)
+    kogusumma=np.sum(kõrgused)
+    return keskmine,kõrgeim,madalaim,kogusumma
 
-for rida in lines:
-    osad=rida.strip().split()
-    nimi=" ".join(osad[:-1]).replace("_"," ")
-    korgus=int(osad[-1])
-    nimed.append(nimi)
-    korgused.append(korgus)
+def loo_graafik(nimed,kõrgused,sorteeritud=False):
+    if sorteeritud:
+        sorted_indices=np.argsort(kõrgused)[::-1]
+        nimed=np.array(nimed)[sorted_indices]
+        kõrgused=np.array(kõrgused)[sorted_indices]
+    plt.figure(figsize=(10,6))
+    plt.bar(nimed,kõrgused,color='skyblue')
+    plt.xlabel('Mägi')
+    plt.ylabel('Kõrgus (meetrites)')
+    plt.title('Mägedes kõrgused')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    plt.savefig('maed_graafik.png')
+    plt.show()
 
-korgused_np=np.array(korgused)
-keskmine=np.mean(korgused_np)
-min_korgus=np.min(korgused_np)
-max_korgus=np.max(korgused_np)
-summa=np.sum(korgused_np)
+def main():
+    failinimi='maed.txt'
+    nimed,kõrgused=loe_andmed_failist(maed.txt)
+    keskmine,kõrgeim,madalaim,kogusumma=arvuta_statistika(kõrgused)
+    print(f'Keskmine kõrgus: {keskmine:.2f} meetrit')
+    print(f'Kõrgeim mägi: {nimed[kõrgused.index(kõrgeim)]} ({kõrgeim} meetrit)')
+    print(f'Madalaim mägi: {nimed[kõrgused.index(madalaim)]} ({madalaim} meetrit)')
+    print(f'Kogusumma (kõrgused kokku): {kogusumma} meetrit')
+    loo_graafik(nimed,kõrgused)
+    loo_graafik(nimed,kõrgused,sorteeritud=True)
 
-print("Keskmine kõrgus:",keskmine,"m")
-print("Kõrgeim mägi:",nimed[np.argmax(korgused_np)],"-",max_korgus,"m")
-print("Madalaim mägi:",nimed[np.argmin(korgused_np)],"-",min_korgus,"m")
-print("Kogukõrgus:",summa,"m")
-
-nimed_sorted=[x for _,x in sorted(zip(korgused,nimed),reverse=True)]
-korgused_sorted=sorted(korgused,reverse=True)
-
-plt.figure(figsize=(10,6))
-plt.bar(nimed_sorted,korgused_sorted,color='skyblue')
-plt.xticks(rotation=45,ha='right')
-plt.ylabel('Kõrgus (m)')
-plt.title('Maailma kõrgeimad mäed')
-plt.tight_layout()
-plt.savefig("maed_graafik.png")
-plt.show()
-plt.show()
+if __name__ == '__main__':
+    main()
